@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cool9 Invoice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#EDF2F3;--panel:#fff;--ink:#0F1A1E;--mut:#58686E;--line:#D3DDE0;--acc:#0B8BA6;--on-acc:#fff;--soft:#D6F0F5;--field:#F4F8F9;--bad:#C2362B;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0B1114;--panel:#131C20;--ink:#E8EFF1;--mut:#8DA0A7;--line:#233036;--acc:#52C6DC;--on-acc:#06232A;--soft:#17363E;--field:#0E1619;--bad:#FF7A6E}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0B1114;--panel:#131C20;--ink:#E8EFF1;--mut:#8DA0A7;--line:#233036;--acc:#52C6DC;--on-acc:#06232A;--soft:#17363E;--field:#0E1619;--bad:#FF7A6E}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 15px/1.5 Manrope,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1160px;margin:0 auto;padding:22px 20px 56px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#0d1a1f 0 45%,#2f7f90 100%);position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+.logo:after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.5) 50%,transparent 60%);transform:translateX(-120%);animation:glint 1.6s .9s ease-out forwards}
+@keyframes glint{to{transform:translateX(120%)}}
+h1{font:700 15px/1.2 Unbounded,sans-serif;margin:0;letter-spacing:.01em}
+header small{display:block;color:var(--mut);font-weight:500;font-size:13px;margin-top:3px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:28px;align-items:start}
+@media (max-width:880px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px}
+h2{font:600 17px/1.3 Manrope,"PingFang SC",sans-serif;margin:0 0 16px}
+.f{display:block;margin-bottom:16px}
+.f>span,.lbl{display:block;font-size:13px;color:var(--mut);margin-bottom:6px;font-weight:600}
+input,select{width:100%;font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:11px 12px;min-height:44px;transition:border-color .2s,box-shadow .2s,background .2s}
+input:focus,select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--soft)}
+input::placeholder{color:var(--mut);opacity:.7}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+.bad input{border-color:var(--bad)}
+.bad{animation:shake .38s}
+@keyframes shake{20%{transform:translateX(-5px)}50%{transform:translateX(5px)}80%{transform:translateX(-3px)}}
+hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+.row{display:grid;grid-template-columns:128px 1fr 132px 40px;gap:8px;margin-bottom:10px;align-items:center;transform-origin:top}
+@media (max-width:620px){.row{grid-template-columns:1fr 1fr 40px;padding-bottom:12px;border-bottom:1px dashed var(--line)}.row .d{grid-column:1/-1;order:3}}
+.row.in{animation:rin .34s cubic-bezier(.2,.8,.3,1)}
+.row.out{animation:rout .22s ease-in forwards}
+@keyframes rin{from{opacity:0;transform:translateY(-8px) scaleY(.9)}}
+@keyframes rout{to{opacity:0;transform:translateX(24px)}}
+.amt{display:flex;align-items:center;background:var(--field);border:1px solid var(--line);border-radius:10px;padding-left:10px;min-height:44px;transition:border-color .2s,box-shadow .2s}
+.amt:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px var(--soft)}
+.amt span{color:var(--mut);font-size:13px;font-weight:700}
+.amt input{border:0;background:transparent;box-shadow:none;padding-left:6px;min-width:0}
+.x{width:40px;height:40px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--mut);font-size:20px;cursor:pointer;transition:background .2s,color .2s}
+.x:hover:not(:disabled){background:var(--soft);color:var(--bad)}
+.x:disabled{opacity:.3;cursor:default}
+.ghost{font:inherit;font-weight:700;color:var(--acc);background:transparent;border:1.5px dashed var(--acc);border-radius:10px;padding:10px 14px;min-height:44px;cursor:pointer;transition:background .2s}
+.ghost:hover{background:var(--soft)}
+.seg{position:relative;display:grid;grid-template-columns:repeat(3,1fr);background:var(--field);border:1px solid var(--line);border-radius:12px;padding:4px;--i:1}
+.seg i{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);background:var(--acc);border-radius:9px;transform:translateX(calc(var(--i)*100%));transition:transform .4s cubic-bezier(.3,1.35,.5,1)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{position:relative;text-align:center;padding:10px 4px;font-weight:700;cursor:pointer;color:var(--mut);transition:color .25s;border-radius:9px}
+.seg input:checked+label{color:var(--on-acc)}
+.seg input:focus-visible+label{outline:2px solid var(--ink);outline-offset:2px}
+.dl{width:100%;margin-top:24px;display:flex;align-items:center;justify-content:center;gap:10px;font:700 16px Manrope,"PingFang SC",sans-serif;color:var(--on-acc);background:var(--acc);border:0;border-radius:12px;min-height:52px;cursor:pointer;transition:transform .15s,filter .2s}
+.dl:hover{filter:brightness(1.07)}.dl:active{transform:scale(.98)}
+.dl svg{width:20px;height:20px;transition:transform .3s}
+.dl:hover svg{transform:translateY(2px)}
+.dl[data-s="busy"]{pointer-events:none}
+.dl[data-s="busy"] svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.sw{position:relative;display:flex;align-items:center;gap:12px;margin-top:16px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field);cursor:pointer}
+.sw input{position:absolute;opacity:0;pointer-events:none}
+.tg{width:44px;height:26px;border-radius:99px;background:var(--line);position:relative;flex:none;transition:background .25s}
+.tg:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+.sw input:checked+.tg{background:var(--acc)}
+.sw input:checked+.tg:after{transform:translateX(18px)}
+.sw input:focus-visible+.tg{outline:2px solid var(--ink);outline-offset:2px}
+.st b{display:block}.st small{color:var(--mut);font-size:12.5px}
+.sums{margin:1.2em 0 0 auto;width:62%;padding:0 1em}
+.sums.off{display:none}
+.sums div{display:flex;justify-content:space-between;color:#4B5B63;padding:.15em 0;font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+.row .k{grid-column:1/3}
+@media (max-width:620px){.row .k{grid-column:1/-1;order:2}}
+.sticky{position:sticky;top:18px}
+@media (max-width:880px){.sticky{position:static}}
+.paper{position:relative;background:#FCFCFA;color:#12202A;border-radius:6px;padding:7% 7% 6%;font-size:clamp(10.5px,1.5vw,13px);line-height:1.5;box-shadow:0 1px 0 rgba(0,0,0,.05),0 24px 60px -22px rgba(0,0,0,.45);overflow:hidden}
+.paper::before{content:"";position:absolute;left:0;top:0;right:0;height:5px;background:linear-gradient(90deg,#0F1A1E 0 70%,#0B8BA6 70%)}
+.film{position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(105deg,#0a1317 0%,#1b2e35 60%,#2c4650 100%);animation:peel 1.25s .35s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes peel{to{clip-path:inset(0 0 0 100%);visibility:hidden}}
+.ph{display:flex;justify-content:space-between;gap:16px;margin-bottom:2.2em}
+.ph b.co{font:700 1.15em/1.25 Unbounded,sans-serif;display:block;margin-bottom:.5em}
+.ph p{margin:0;color:#4B5B63;font-size:.88em}
+.ph .r{text-align:right;flex:none}
+.ph .r h3{font:700 2em/1 Unbounded,sans-serif;margin:0 0 .5em;letter-spacing:.01em}
+.meta{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #DDE4E6;padding-top:1.1em;margin-bottom:1.6em}
+.meta small{display:block;color:#6A7A81;font-weight:600;font-size:.85em}
+.meta b{font-size:1.1em}
+.t{width:100%;border-collapse:collapse}
+.t th{background:#0F1A1E;color:#fff;text-align:left;padding:.6em .8em;font-weight:600;font-size:.9em}
+.t th:last-child,.t td:last-child{text-align:right}
+.t td{padding:.7em .8em;border-bottom:1px solid #E3E9EB;vertical-align:top}
+.t td small{display:block;color:#6A7A81}
+.t .e td{color:#9AA8AE;text-align:center}
+.tot{margin:.5em 0 0 auto;width:62%;background:#E3F4F7;border-radius:6px;padding:.8em 1em;display:flex;justify-content:space-between;align-items:baseline}
+.tot b:last-child{font:700 1.5em Unbounded,sans-serif;font-variant-numeric:tabular-nums}
+.pf{margin-top:2.4em;color:#6A7A81;font-size:.85em;text-align:center}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s,transform .3s;z-index:9;max-width:90vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.film{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="logo" aria-hidden="true"></div><div><h1>COOL9</h1><small>Invoice 开单</small></div></header>
+<div class="grid">
+<main class="panel">
+<h2>发票资料</h2>
+<div class="two">
+<label class="f" id="fNo"><span>发票号码</span><input id="no" placeholder="例如 C9-0001" autocomplete="off"></label>
+<label class="f"><span>日期</span><input id="dt" type="date"></label>
+</div>
+<label class="f" id="fCu"><span>顾客名字</span><input id="cu" placeholder="顾客姓名 / 公司" autocomplete="off"></label>
+<hr>
+<h2>项目与金额</h2>
+<div id="rows"></div>
+<button class="ghost" id="add" type="button">+ 新增项目</button>
+<hr>
+<span class="lbl">付款方式</span>
+<div class="seg" id="seg" role="radiogroup" aria-label="付款方式"><i></i>
+<input type="radio" name="pm" id="p0" value="Card"><label for="p0">Card</label>
+<input type="radio" name="pm" id="p1" value="Cash" checked><label for="p1">Cash</label>
+<input type="radio" name="pm" id="p2" value="Transfer"><label for="p2">Transfer</label>
+</div>
+<label class="sw"><input type="checkbox" id="sst"><span class="tg"></span><span class="st"><b>SST 8%</b><small>Card / Transfer 自动加，Cash 不加。可手动开关</small></span></label>
+<button class="dl" id="dl" type="button" data-s="idle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg><span id="dlt">下载 PDF</span></button>
+</main>
+<aside class="sticky" aria-label="预览">
+<div class="paper">
+<div class="film"></div>
+<div class="ph"><div><b class="co" id="vCo">COOL9 CAR TINT SDN BHD</b><p id="vReg">Reg. No. 202501038301 (1639710-K)</p><p>36 Jalan Sulam, Taman Sentosa,</p><p>80150 Johor Bahru, Johor</p><p id="vTel">Tel: 017-8790888</p><p id="vTin" hidden>TIN No: C60353802090</p><p id="vSstNo" hidden>SST No: J31-2610-32000055</p></div><div class="r"><h3>INVOICE</h3><p id="vNo">No. –</p><p id="vDt">–</p></div></div>
+<div class="meta"><div><small>Bill to</small><b id="vCu">–</b></div><div style="text-align:right"><small>Payment method</small><b id="vPm">Cash</b></div></div>
+<table class="t"><thead><tr><th style="width:2.5em">No.</th><th>Description</th><th>Amount (RM)</th></tr></thead><tbody id="vRows"></tbody></table>
+<div class="sums off" id="vSums"><div><span>Subtotal (RM)</span><span id="vSub">0.00</span></div><div><span>SST 8% (RM)</span><span id="vSst">0.00</span></div></div>
+<div class="tot"><b>TOTAL (RM)</b><b id="vTot">0.00</b></div>
+<div class="pf">Thank you for choosing Cool9 Car Tint.</div>
+</div>
+</aside>
+</div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+var TYPES=["Tinted","Coating","PPF","Wrapping"],KINDS=["HP","Nano Ceramic","Nano Pro","Sputter","4K Sputter","5K Sputter"],rows=[],uid=0,shown=0,raf=0;
+var reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+var fmt=function(n){return n.toLocaleString("en-MY",{minimumFractionDigits:2,maximumFractionDigits:2})};
+function two(n){return String(n).padStart(2,"0")}
+var now=new Date();
+$("#dt").value=now.getFullYear()+"-"+two(now.getMonth()+1)+"-"+two(now.getDate());
+function dstr(v){if(!v)return"–";var p=v.split("-");return p[2]+"/"+p[1]+"/"+p[0]}
+function nm(r){return r.type==="__c"?(r.detail.trim()||"Custom item"):(r.type==="Tinted"&&r.kind?"Tinted - "+r.kind:r.type)}
+function sub(r){return r.type==="__c"?"":r.detail.trim()}
+function mk(r){
+  var el=document.createElement("div");el.className="row";
+  el.innerHTML='<select aria-label="项目">'+TYPES.map(function(t){return"<option>"+t+"</option>"}).join("")+'<option value="__c">自定义</option></select><input class="d" type="text" aria-label="细节" placeholder="细节，例如车牌 / 车型"><label class="amt"><span>RM</span><input class="a" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="金额"></label><button type="button" class="x" aria-label="删除项目">×</button><select class="k" aria-label="Tinted 种类"><option value="">选择 Tinted 种类</option>'+KINDS.map(function(t){return"<option>"+t+"</option>"}).join("")+'</select>';
+  var s=el.querySelector("select"),d=el.querySelector(".d"),a=el.querySelector(".a");
+  var k=el.querySelector(".k");k.onchange=function(){r.kind=k.value;sync()};
+  s.onchange=function(){r.type=s.value;k.hidden=s.value!=="Tinted";d.placeholder=s.value==="__c"?"项目名称，自己输入":"细节，例如车牌 / 车型";if(s.value==="__c")d.focus();sync()};
+  d.oninput=function(){r.detail=d.value;sync()};
+  a.oninput=function(){r.amt=parseFloat(a.value)||0;sync()};
+  el.querySelector(".x").onclick=function(){
+    if(rows.length<2)return;
+    rows=rows.filter(function(x){return x!==r});
+    el.classList.add("out");setTimeout(function(){el.remove();sync()},reduce?0:210);sync();
+  };
+  return el;
+}
+function addRow(focus){
+  var r={id:++uid,type:"Tinted",kind:"",detail:"",amt:0};rows.push(r);
+  var el=mk(r);el.classList.add("in");$("#rows").appendChild(el);sync();
+  if(focus)el.querySelector("select").focus();
+}
+function base(){return rows.reduce(function(t,r){return t+(r.amt||0)},0)}
+function sstAmt(){return $("#sst").checked?Math.round(base()*8)/100:0}
+function total(){return base()+sstAmt()}
+function setTotal(t){
+  cancelAnimationFrame(raf);var from=shown;shown=t;var el=$("#vTot");
+  if(reduce){el.textContent=fmt(t);return}
+  var t0=performance.now();
+  (function step(n){var k=Math.min(1,(n-t0)/450),e=1-Math.pow(1-k,3);el.textContent=fmt(from+(t-from)*e);if(k<1)raf=requestAnimationFrame(step)})(t0);
+}
+function sync(){
+  var body=$("#vRows");body.innerHTML="";
+  var any=rows.some(function(r){return r.amt>0||r.detail.trim()});
+  rows.forEach(function(r,i){
+    var tr=document.createElement("tr"),c1=document.createElement("td"),c2=document.createElement("td"),c3=document.createElement("td"),b=document.createElement("b");
+    c1.textContent=i+1;b.textContent=nm(r);c2.appendChild(b);
+    if(sub(r)){var sm=document.createElement("small");sm.textContent=sub(r);c2.appendChild(sm)}
+    c3.textContent=fmt(r.amt||0);tr.append(c1,c2,c3);body.appendChild(tr);
+  });
+  var live=document.querySelectorAll(".row:not(.out) .x");
+  live.forEach(function(x){x.disabled=live.length<2});
+  $("#vNo").textContent="No. "+($("#no").value.trim()||"–");
+  $("#vDt").textContent=dstr($("#dt").value);
+  $("#vCu").textContent=$("#cu").value.trim()||"–";
+  var cash=document.querySelector('input[name="pm"]:checked').value==="Cash";
+  $("#vCo").hidden=cash;$("#vReg").hidden=cash;$("#vTel").hidden=cash;
+  $("#vTin").hidden=cash||!$("#sst").checked;$("#vSstNo").hidden=$("#vTin").hidden;
+  $("#vSums").classList.toggle("off",!$("#sst").checked);
+  $("#vSub").textContent=fmt(base());$("#vSst").textContent=fmt(sstAmt());
+  setTotal(total());
+}
+["#no","#dt","#cu"].forEach(function(s){$(s).addEventListener("input",function(){this.closest(".f")&&this.closest(".f").classList.remove("bad");sync()})});
+document.querySelectorAll('input[name="pm"]').forEach(function(p,i){
+  p.onchange=function(){$("#seg").style.setProperty("--i",i);$("#vPm").textContent=p.value;$("#sst").checked=p.value!=="Cash";sync()};
+});
+$("#seg").style.setProperty("--i",1);
+$("#sst").onchange=sync;
+$("#add").onclick=function(){addRow(true)};
+var tt;function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){t.classList.remove("on")},2800)}
+function bad(id,msg){var f=$(id).closest(".f");f.classList.remove("bad");void f.offsetWidth;f.classList.add("bad");$(id).focus();toast(msg)}
+function build(){
+  var J=window.jspdf.jsPDF,d=new J({unit:"mm",format:"a4"}),M=18,R=192;
+  d.setFillColor(15,26,30);d.rect(0,0,210,6,"F");d.setFillColor(11,139,166);d.rect(150,0,60,6,"F");
+  d.setTextColor(15,26,30);d.setFont("helvetica","bold");d.setFontSize(15);var cash=document.querySelector('input[name="pm"]:checked').value==="Cash";if(!cash)d.text("COOL9 CAR TINT SDN BHD",M,22);
+  d.setFont("helvetica","normal");d.setFontSize(8.5);d.setTextColor(88,104,110);
+  if(cash){d.setFontSize(9.5);d.text("36 Jalan Sulam, Taman Sentosa, 80150 Johor Bahru, Johor",M,22)}else{d.text("Reg. No. 202501038301 (1639710-K)",M,27);d.text("36 Jalan Sulam, Taman Sentosa, 80150 Johor Bahru, Johor",M,31);d.text("Tel: 017-8790888",M,35);if($("#sst").checked){d.text("TIN No: C60353802090",M,39);d.text("SST No: J31-2610-32000055",M,43)}}
+  d.setFont("helvetica","bold");d.setFontSize(24);d.setTextColor(15,26,30);d.text("INVOICE",R,24,{align:"right"});
+  d.setFontSize(9.5);d.setFont("helvetica","normal");d.setTextColor(88,104,110);
+  d.text("Invoice No: "+$("#no").value.trim(),R,32,{align:"right"});d.text("Date: "+dstr($("#dt").value),R,37,{align:"right"});
+  d.setDrawColor(211,221,224);d.line(M,46,R,46);
+  d.setFontSize(8.5);d.text("BILL TO",M,55);d.text("PAYMENT METHOD",R,55,{align:"right"});
+  d.setFont("helvetica","bold");d.setFontSize(12);d.setTextColor(15,26,30);
+  d.text(d.splitTextToSize($("#cu").value.trim(),110),M,62);
+  d.text(document.querySelector('input[name="pm"]:checked').value,R,62,{align:"right"});
+  var y=78;
+  function head(){d.setFillColor(15,26,30);d.rect(M,y,R-M,8,"F");d.setTextColor(255,255,255);d.setFontSize(9);d.text("No.",M+3,y+5.4);d.text("Description",M+16,y+5.4);d.text("Amount (RM)",R-3,y+5.4,{align:"right"});y+=8}
+  head();
+  rows.forEach(function(r,i){
+    var subs=sub(r)?d.splitTextToSize(sub(r),115):[],names=d.splitTextToSize(nm(r),115),h=5+names.length*4.6+subs.length*4+3;
+    if(y+h>262){d.addPage();y=20;head()}
+    d.setTextColor(15,26,30);d.setFont("helvetica","normal");d.setFontSize(9.5);d.text(String(i+1),M+3,y+6);
+    d.setFont("helvetica","bold");d.text(names,M+16,y+6);
+    d.setFont("helvetica","normal");d.setFontSize(8.5);d.setTextColor(88,104,110);if(subs.length)d.text(subs,M+16,y+6+names.length*4.6);
+    d.setFontSize(9.5);d.setTextColor(15,26,30);d.text(fmt(r.amt||0),R-3,y+6,{align:"right"});
+    y+=h;d.setDrawColor(227,233,235);d.line(M,y,R,y);
+  });
+  if(y>240){d.addPage();y=20}
+  y+=6;if($("#sst").checked){d.setFont("helvetica","normal");d.setFontSize(9.5);d.setTextColor(88,104,110);d.text("Subtotal (RM)",112,y+3);d.text(fmt(base()),R-3,y+3,{align:"right"});d.text("SST 8% (RM)",112,y+9);d.text(fmt(sstAmt()),R-3,y+9,{align:"right"});y+=14}
+  d.setTextColor(15,26,30);d.setFillColor(227,244,247);d.roundedRect(108,y,R-108,13,1.5,1.5,"F");
+  d.setFont("helvetica","bold");d.setFontSize(10);d.text("TOTAL (RM)",112,y+8.3);d.setFontSize(14);d.text(fmt(total()),R-3,y+8.7,{align:"right"});
+  d.setFont("helvetica","normal");d.setFontSize(8.5);d.setTextColor(88,104,110);
+  d.text("Thank you for choosing Cool9 Car Tint.",105,284,{align:"center"});
+  return d;
+}
+$("#dl").onclick=async function(){
+  var btn=this,lab=$("#dlt");
+  if(!$("#no").value.trim())return bad("#no","请先填写发票号码");
+  if(!$("#cu").value.trim())return bad("#cu","请先填写顾客名字");
+  if(!$("#dt").value)return bad("#dt","请选择日期");
+  if(!(total()>0))return toast("请填写至少一个项目的金额");
+  var miss=rows.findIndex(function(r){return r.type==="Tinted"&&!r.kind});
+  if(miss>-1){document.querySelectorAll(".row:not(.out) .k")[miss].focus();return toast("请选择 Tinted 种类")}
+  if(!window.jspdf)return toast("PDF 组件未加载，请检查网络后重试");
+  btn.dataset.s="busy";lab.textContent="生成中…";
+  try{
+    var doc=build(),fn="Invoice-"+$("#no").value.trim().replace(/[^\w\-]+/g,"_")+".pdf",dls=null;
+    try{dls=window.claude&&await claude.use("downloads")}catch(e){}
+    if(dls)await dls.save({filename:fn,data:doc.output("blob")});else doc.save(fn);
+    lab.textContent="已下载";toast("发票已下载");
+  }catch(e){
+    if(e&&e.code==="declined")lab.textContent="下载 PDF";else{lab.textContent="下载 PDF";toast("下载失败，请再试一次")}
+  }
+  btn.dataset.s="idle";setTimeout(function(){lab.textContent="下载 PDF"},1800);
+};
+addRow(false);
+})();
+</script>
+</body>
+</html>
